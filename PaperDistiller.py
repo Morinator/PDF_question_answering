@@ -12,30 +12,23 @@ class PaperDistiller:
     def __init__(self, paper_name):
         self.name = paper_name
         self.answers = {}
-        self.cached_answers = pickledb.load('distller.db', auto_dump=False, sig=False)
+        self.cached_answers = pickledb.load('distiller.db', auto_dump=False, sig=False)
 
     def split_pdf(self, chunk_chars=4000, overlap=50):
-        """
-        Pre-process PDF into chunks
-        Some code from: https://github.com/whitead/paper-qa/blob/main/paperqa/readers.py
-        """
-
-        pdfFileObj = open("Papers/%s.pdf" % self.name, "rb")
-        pdfReader = pypdf.PdfReader(pdfFileObj)
+        pdf_file_obj = open("Papers/%s.pdf" % self.name, "rb")
+        pdf_reader = pypdf.PdfReader(pdf_file_obj)
         splits = []
         split = ""
-        for i, page in enumerate(pdfReader.pages):
+        for i, page in enumerate(pdf_reader.pages):
             split += page.extract_text()
             if len(split) > chunk_chars:
                 splits.append(split[:chunk_chars])
                 split = split[chunk_chars - overlap:]
-        pdfFileObj.close()
+        pdf_file_obj.close()
+        print(f"Split into {len(splits)} chunks")
         return splits
 
     def read_or_create_index(self):
-        """
-        Read or generate embeddings for pdf
-        """
 
         if os.path.isdir('Index/%s' % self.name):
             print("Index Found!")
@@ -47,9 +40,6 @@ class PaperDistiller:
             self.ix.save_local('Index/%s' % self.name)
 
     def query_and_distill(self, query):
-        """
-        Query embeddings and pass relevant chunks to LLM for answer
-        """
 
         # Answer already in memory
         if query in self.answers:
@@ -69,7 +59,4 @@ class PaperDistiller:
             return self.answers[query]
 
     def cache_answers(self):
-        """
-        Write answers to local pickledb
-        """
         self.cached_answers.dump()

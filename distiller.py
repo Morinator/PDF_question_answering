@@ -4,20 +4,18 @@ import streamlit as st
 
 from PaperDistiller import PaperDistiller
 
-st.sidebar.image("Img/sidebar_img.jpeg")
-
+# create page
+st.title("Paper Distiller")
+st.sidebar.image("https://uploads-eu-west-1.insided.com/xentral-en/attachment/7eb5a51d-1457-4db1-ae76-7b51d36ea392_thumb.png")
 papers = [l.split('.')[0] for l in os.listdir("Papers/") if l.endswith('.pdf')]
-selectbox = st.sidebar.radio('Which do you want to use?', papers)
+select_box = st.sidebar.radio('Select a PDF', papers)
+st.header("`Paper Distiller`")
+query = st.text_input("Ask a question about the paper!", "What is the main idea?")
 
-
-distiller = PaperDistiller(selectbox)
+# create distiller object
+distiller = PaperDistiller(select_box)
 distiller.read_or_create_index()
 
-query = "Was sind mögliche Gründe für einen Klärfall?"
-
-st.header("`Paper Distiller`")
-
-st.subheader(f"Question: {query}")
-st.info(distiller.query_and_distill(query))
-
+# show and cache answer
+st.info(distiller.query_and_distill(query), icon="💡")
 distiller.cache_answers()
